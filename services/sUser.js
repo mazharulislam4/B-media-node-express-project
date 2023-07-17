@@ -9,8 +9,11 @@ export function createUser(data) {
 }
 
 // get all users
-export function getUsers() {
-  return User.find();
+export async function getUsers() {
+ const user = await User.find();
+ 
+ user.forEach((user)=>{ delete user._doc.password} )
+return user;
 }
 
 // find by property
@@ -140,4 +143,22 @@ export async function sUnfollower(followingId, userId) {
 export const sDeleteUser =  (id)=>{
   if(id) return User.findByIdAndDelete(id)
   return erro('id  missing' , 400)
+}
+
+
+// active status  
+export const sActiveStatus = async (id , status)=>{
+  if(id && status){
+    const user = await User.findByIdAndUpdate(id , {$set:{active_status: status }} , {returnDocument: 'after'});
+    if(!user) throw erro('user not found!',404)
+    // create a updated object from providad DB
+     const {fullName , email , _id , avatar , active_status} = user 
+    return  {
+      fullName,
+      email ,
+      id: _id, 
+      avatar: avatar.url,
+      activeStatus: active_status
+    } ;
+  }
 }

@@ -4,11 +4,11 @@ import { cDeleteUser, cGetAllUser, cGetUserById, cPutUser, cSetFollowers, cUnfol
 import { authenticate, isAdmin } from "../middlewares/common/authorization.js";
 import { anyUploader } from "../middlewares/uploader/uploader.js";
 
+
 const userRouter = express.Router()
 
 // get all users 
 userRouter.get('/' , authenticate   , cGetAllUser )
-
 
 // get by id 
 userRouter.get('/:id' , authenticate , cGetUserById)
@@ -32,6 +32,8 @@ userRouter.patch('/:id/unfollowing' , cUnfollowing)
 
 // unfollower 
 userRouter.patch('/:id/unfollower' , cUnfollower);
+
+
 
 
 export default userRouter;

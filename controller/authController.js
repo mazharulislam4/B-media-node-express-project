@@ -6,7 +6,7 @@ import {
   sLogin,
   sRegisterUser,
   sResetPasswordToken,
-  sUpdatePassword
+  sUpdatePassword,
 } from "../services/sAuth.js";
 import { getUserByProperty } from "../services/sUser.js";
 
@@ -81,11 +81,12 @@ export async function cRegister(req, res, next) {
 export async function cLogin(req, res, next) {
   const { email, password } = req.body;
   try {
-    const token = await sLogin({ email, password });
-    if (token) {
+    const data = await sLogin({ email, password });
+    // if  token match on the bd than set cookie and update status
+    if (data && data?.token) {
       res.cookie(
         config.cookie.name,
-        { token },
+        { token: data.token },
         {
           maxAge: config.cookie.expiresIn,
           httpOnly: true,
@@ -93,17 +94,20 @@ export async function cLogin(req, res, next) {
         }
       );
 
+
+      // response if login success
       return res.status(200).json({
         error: false,
-        data: { token },
+        data: { token: data.token, user: data.user },
         msg: "User loged In successfully!",
       });
     }
-    return res.status(200).json({
+    // if token doesn't match
+    return res.status(500).json({
       error: true,
-      data: null ,
-      msg: "email or password don't match!",
-    });;
+      data: null,
+      msg: "internal server error",
+    });
   } catch (err) {
     next(err);
   }
@@ -156,16 +160,30 @@ export async function cUpdatePassword(req, res, next) {
         .status(400)
         .json({ error: true, data: null, msg: "Password dont matchs!" });
 
-     const update = await sUpdatePassword(token , id , password) 
-     if(!update)  return res
-     .status(400)
-     .json({ error: true, data: null, msg: "Not update may internal sever error" });
+    const update = await sUpdatePassword(token, id, password);
+    if (!update)
+      return res.status(400).json({
+        error: true,
+        data: null,
+        msg: "Not update may internal sever error",
+      });
 
-     return res
-     .status(200)
-     .json({ error: null, data: update, msg: "New password updated!" });
-
+    return res
+      .status(200)
+      .json({ error: null, data: update, msg: "New password updated!" });
   } catch (err) {
     next(err);
+  }
+}
+
+// logout user
+
+export function cLogout(req, res) {
+  try {
+    res.clearCookie(config.cookie.name);
+    req.headers.authorization = null;
+    return res.status(200).json({ message: "successfully logedout!" , error: false});
+  } catch (err) {
+    res.status(400).json({ error: "internal server error to logedout!" , error: true });
   }
 }

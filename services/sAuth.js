@@ -33,7 +33,7 @@ export async function sLogin({ email, password }) {
   const user = await getUserByProperty("email", email);
 
   if (!user) {
-    throw erro("you haven't account! please register", 400);
+    throw erro("you don't have an account! please singup", 400);
   }
 
   const hashed = await compare(password, user.password);
@@ -49,8 +49,13 @@ export async function sLogin({ email, password }) {
     userRole: user.roles,
     avatar: user.avatar,
   };
+  
+  const token =  jwt.sign(payload, config.jwt.key, { expiresIn: config.jwt.expiresIn });
 
-  return jwt.sign(payload, config.jwt.key, { expiresIn: config.jwt.expiresIn });
+  return {
+    token, 
+    user: payload
+  }
 }
 
 // reset password
@@ -109,3 +114,4 @@ export const sUpdatePassword = async (token, id, password) => {
 
   return update.acknowledged;
 };
+

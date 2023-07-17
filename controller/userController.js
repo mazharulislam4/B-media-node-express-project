@@ -12,6 +12,7 @@ import {
 // get all users
 
 export const cGetAllUser = async (req, res, next) => {
+
   try {
     const users = await getUsers();
     if (!users) {

@@ -31,7 +31,7 @@ export const sGetAllPost = (query) => {
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({ [sort]: order })
-      .populate("user", "_id , email , fullname , roles");
+      .populate("user", "_id , email , fullName, avatar , firstName , roles , active_status");
   }
   return Post.find().populate("user", "_id , email , fullname , roles");
 };
